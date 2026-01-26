@@ -1,0 +1,4 @@
+module CCppWinRT {
+    header "Include/CCppWinRT.h"
+    export *
+}
