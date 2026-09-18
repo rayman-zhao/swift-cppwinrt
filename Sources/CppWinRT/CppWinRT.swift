@@ -45,9 +45,31 @@ extension WinUI.IVectorAny {
     }
 }
 
+extension WindowsFoundation.IInspectable {
+
+    /// 装箱字符串内容。经 `unbox_value<hstring>` 原生解箱（同
+    /// `IVectorAny.string(at:)` 的理由，投影的 Any 解包不认 IReference`1<String>）；
+    /// 非字符串返回 nil。适合从 `Any?` 里取出 WinRT 集合（如 ItemsView 的
+    /// `selectedItems`）中的字符串元素。
+    public var boxedString: String? {
+        var hstring: HSTRING?
+        guard inspectable_get_string(rawInspectable(self), &hstring) >= 0,
+            let hstring
+        else { return nil }
+        return String(hString: HString(consuming: hstring))
+    }
+}
+
 private func rawInspectable(
     _ vector: WinUI.IVectorAny
 ) -> UnsafeMutablePointer<CCppWinRT.IInspectable>! {
     UnsafeMutableRawPointer(vector.pUnk.borrow)
+        .assumingMemoryBound(to: CCppWinRT.IInspectable.self)
+}
+
+private func rawInspectable(
+    _ value: WindowsFoundation.IInspectable
+) -> UnsafeMutablePointer<CCppWinRT.IInspectable>! {
+    UnsafeMutableRawPointer(value.pUnk.borrow)
         .assumingMemoryBound(to: CCppWinRT.IInspectable.self)
 }
