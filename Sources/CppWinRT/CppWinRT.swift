@@ -30,3 +30,24 @@ public func single_threaded_observable_vector(_ items: [String]) -> WinUI.IVecto
     guard let source = single_threaded_observable_vector_inspectable(items) else { return nil }
     return try? source.QueryInterface()
 }
+
+extension WinUI.IVectorAny {
+
+    /// index 处的字符串元素。GetAt 与解箱在原生侧一次往返完成（装箱字符串的
+    /// 运行时类是 `IReference`1<String>`，投影的 Any 解包不认它）；越界或
+    /// 非字符串元素返回 nil。
+    public func string(at index: Int) -> String? {
+        var hstring: HSTRING?
+        guard vector_get_string_at(rawInspectable(self), UInt32(index), &hstring) >= 0,
+            let hstring
+        else { return nil }
+        return String(hString: HString(consuming: hstring))
+    }
+}
+
+private func rawInspectable(
+    _ vector: WinUI.IVectorAny
+) -> UnsafeMutablePointer<CCppWinRT.IInspectable>! {
+    UnsafeMutableRawPointer(vector.pUnk.borrow)
+        .assumingMemoryBound(to: CCppWinRT.IInspectable.self)
+}

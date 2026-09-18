@@ -17,6 +17,10 @@ import WinUI
 
         let vector = try #require(single_threaded_observable_vector(["a", "b"]))
         #expect(try vector.get_Size() == 2)
+        // 装箱字符串读回：GetAt + 解箱合一。
+        #expect(vector.string(at: 0) == "a")
+        #expect(vector.string(at: 1) == "b")
+        #expect(vector.string(at: 2) == nil)
 
         let observable: WinUI.IObservableVectorAny = try vector.QueryInterface()
         var changeCount = 0
