@@ -68,18 +68,3 @@ int32_t inspectable_get_string(::IInspectable *value, HSTRING *result)
     ptr.copy_from(value);
     return unbox_to_hstring(ptr.as<winrt::Windows::Foundation::IInspectable>(), result);
 }
-
-int32_t vector_get_string_at(::IInspectable *vector, uint32_t index, HSTRING *result)
-{
-    constexpr int32_t E_INVALIDARG_ = static_cast<int32_t>(0x80070057);
-    if (!vector || !result) return E_INVALIDARG_;
-    try
-    {
-        winrt::com_ptr<::IInspectable> ptr;
-        ptr.copy_from(vector);
-        auto vec = ptr.as<winrt::Windows::Foundation::Collections::IVector<winrt::Windows::Foundation::IInspectable>>();
-        return unbox_to_hstring(vec.GetAt(index), result);
-    }
-    catch (winrt::hresult_error const& e) { return static_cast<int32_t>(e.code().value); }
-    catch (...) { return static_cast<int32_t>(0x80004005); }
-}

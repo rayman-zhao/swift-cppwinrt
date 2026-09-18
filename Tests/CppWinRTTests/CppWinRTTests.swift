@@ -23,6 +23,11 @@ import WinUI
         #expect(vector.string(at: 2) == nil)
         let boxed = try vector.GetAt(0) as? WindowsFoundation.IInspectable
         #expect(boxed?.boxedString == "a")
+        // 只读视图（IVectorView）上的同名读取。
+        let view = try vector.GetView()
+        #expect(view?.string(at: 0) == "a")
+        #expect(view?.string(at: 1) == "b")
+        #expect(view?.string(at: 2) == nil)
 
         let observable: WinUI.IObservableVectorAny = try vector.QueryInterface()
         var changeCount = 0

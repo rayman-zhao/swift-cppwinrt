@@ -33,15 +33,23 @@ public func single_threaded_observable_vector(_ items: [String]) -> WinUI.IVecto
 
 extension WinUI.IVectorAny {
 
-    /// index 处的字符串元素。GetAt 与解箱在原生侧一次往返完成（装箱字符串的
-    /// 运行时类是 `IReference`1<String>`，投影的 Any 解包不认它）；越界或
-    /// 非字符串元素返回 nil。
+    /// index 处的字符串元素；越界或非字符串元素返回 nil
+    ///（越界经 GetAt 抛 E_BOUNDS 自然失败）。解箱经 `boxedString`。
     public func string(at index: Int) -> String? {
-        var hstring: HSTRING?
-        guard vector_get_string_at(rawInspectable(self), UInt32(index), &hstring) >= 0,
-            let hstring
-        else { return nil }
-        return String(hString: HString(consuming: hstring))
+        guard let value = try? GetAt(UInt32(index)) else { return nil }
+        return (value as? String) ?? (value as? WindowsFoundation.IInspectable)?.boxedString
+    }
+}
+
+extension WindowsFoundation.IVectorView where T == Any? {
+
+    /// index 处的字符串元素（如 ItemsView 的 `selectedItems` 视图）；
+    /// 越界或非字符串元素返回 nil。与 `IVectorAny.string(at:)` 同名同义。
+    /// 注：协议一致性的 getAt 内部为 try!，越界会致命崩溃，须先按 count 预检。
+    public func string(at index: Int) -> String? {
+        guard index >= 0, index < count else { return nil }
+        guard let value = getAt(UInt32(index)) else { return nil }
+        return (value as? String) ?? (value as? WindowsFoundation.IInspectable)?.boxedString
     }
 }
 
@@ -58,13 +66,6 @@ extension WindowsFoundation.IInspectable {
         else { return nil }
         return String(hString: HString(consuming: hstring))
     }
-}
-
-private func rawInspectable(
-    _ vector: WinUI.IVectorAny
-) -> UnsafeMutablePointer<CCppWinRT.IInspectable>! {
-    UnsafeMutableRawPointer(vector.pUnk.borrow)
-        .assumingMemoryBound(to: CCppWinRT.IInspectable.self)
 }
 
 private func rawInspectable(
