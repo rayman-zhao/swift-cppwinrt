@@ -14,7 +14,7 @@ using namespace winrt::Windows::Foundation::Collections;
         start += wcslen(start) + 1;
         vi.Append(winrt::box_value(start));
     }
-        
+
     auto iinsp = vi.as<::IInspectable>();
     auto *iinsp_ptr = iinsp.get();
     iinsp_ptr->AddRef();
