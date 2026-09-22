@@ -1,8 +1,8 @@
 import CWinRT
 import CppWinRT
 import Testing
-import WindowsFoundation
 import WinUI
+import WindowsFoundation
 
 /// 可观察向量链路验证：工厂创建 → 类型化句柄原地增删 → VectorChanged 通知
 /// 逐次触发 → 退订后静默。
@@ -10,10 +10,10 @@ import WinUI
 
     @Test func mutationsFireVectorChanged() throws {
         // box_value 走 PropertyValue 激活工厂，本线程需先初始化 WinRT apartment
-        //（RoInitialize 经 CWinRT 模块直接可用；线程已有 apartment 时返回
-        // RPC_E_CHANGED_MODE，属可接受）。
+        // (RoInitialize 经 CWinRT 模块直接可用；线程已有 apartment 时返回
+        // RPC_E_CHANGED_MODE，属可接受)。
         let hr = RoInitialize(RO_INIT_MULTITHREADED)
-        #expect(hr >= 0 || hr == Int32(bitPattern: 0x80010106))
+        #expect(hr >= 0 || hr == Int32(bitPattern: 0x8001_0106))
 
         let vector = try #require(single_threaded_observable_vector(["a", "b"]))
         #expect(try vector.get_Size() == 2)

@@ -1,6 +1,14 @@
 #pragma once
 
-#include <inspectable.h>
+// WinSDK 模块化头：roapi.h 属于 clang module WinSDK.RoApi，会带出 IInspectable；
+// winstring.h 提供 HSTRING。不能直接 #include <inspectable.h>（非模块化头，
+// Swift 6.4 SDK 下与 WinSDK.RoApi 中的重复包含冲突）。
+#include <wtypesbase.h>
+#include <minwindef.h>
+#include <winnt.h>
+#include <combaseapi.h>
+#include <roapi.h>
+#include <winstring.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
