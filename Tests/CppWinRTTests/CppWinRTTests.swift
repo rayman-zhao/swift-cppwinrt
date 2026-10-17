@@ -4,6 +4,11 @@ import Testing
 import WinUI
 import WindowsFoundation
 
+/// 事件处理器是 @Sendable 闭包（可能在任意线程触发），可变计数用此盒子持有。
+final class MutableCounter: @unchecked Sendable {
+    var value = 0
+}
+
 /// 可观察向量链路验证：工厂创建 → 类型化句柄原地增删 → VectorChanged 通知
 /// 逐次触发 → 退订后静默。
 @Suite struct ObservableVectorTests {
@@ -30,9 +35,9 @@ import WindowsFoundation
         #expect(view?.string(at: 2) == nil)
 
         let observable: WinUI.IObservableVectorAny = try vector.QueryInterface()
-        var changeCount = 0
+        let changeCount = MutableCounter()
         let token = try observable.add_VectorChanged { _, _ in
-            changeCount += 1
+            changeCount.value += 1
         }
 
         try vector.Append("c")
@@ -56,12 +61,12 @@ import WindowsFoundation
         #expect(try vector.get_Size() == 3)
 
         // 5 次单点变更（append/insert/removeAtEnd/removeAt/clear）+ 3 次追加，各通知一次。
-        #expect(changeCount == 8)
+        #expect(changeCount.value == 8)
 
         // 退订后不再通知。
         try observable.remove_VectorChanged(token)
         try vector.Append("4")
         #expect(try vector.get_Size() == 4)
-        #expect(changeCount == 8)
+        #expect(changeCount.value == 8)
     }
 }
